@@ -1,32 +1,46 @@
-import os
-import sys
-from sqlalchemy import Column, ForeignKey, Integer, String
-from sqlalchemy.orm import relationship, declarative_base
-from sqlalchemy import create_engine
-from eralchemy2 import render_er
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
 
 Base = declarative_base()
+engine = create_engine('sqlite:///blog_starwars.db')
 
-class Person(Base):
-    __tablename__ = 'person'
-    # Here we define columns for the table person
-    # Notice that each column is also a normal Python instance attribute.
+class Usuario(Base):
+    __tablename__ = 'usuarios'
     id = Column(Integer, primary_key=True)
-    name = Column(String(250), nullable=False)
+    username = Column(String(50), unique=True, nullable=False)
+    email = Column(String(100), unique=True, nullable=False)
+    password = Column(String(100), nullable=False)
+    fecha_creacion = Column(String(20), nullable=False)
+    favoritos = relationship('Favoritos', back_populates='usuario')
 
-class Address(Base):
-    __tablename__ = 'address'
-    # Here we define columns for the table address.
-    # Notice that each column is also a normal Python instance attribute.
+class Planeta(Base):
+    __tablename__ = 'planetas'
     id = Column(Integer, primary_key=True)
-    street_name = Column(String(250))
-    street_number = Column(String(250))
-    post_code = Column(String(250), nullable=False)
-    person_id = Column(Integer, ForeignKey('person.id'))
-    person = relationship(Person)
+    nombre = Column(String(100), nullable=False)
+    descripcion = Column(String(500))
+    clima = Column(String(100))
+    terreno = Column(String(100))
+    favoritos = relationship('Favoritos', back_populates='planeta')
 
-    def to_dict(self):
-        return {}
+class Personaje(Base):
+    __tablename__ = 'personajes'
+    id = Column(Integer, primary_key=True)
+    nombre = Column(String(100), nullable=False)
+    especie = Column(String(100))
+    genero = Column(String(50))
+    descripcion = Column(String(500))
+    favoritos = relationship('Favoritos', back_populates='personaje')
 
-## Draw from SQLAlchemy base
-render_er(Base, 'diagram.png')
+class Favoritos(Base):
+    __tablename__ = 'favoritos'
+    id = Column(Integer, primary_key=True)
+    id_usuario = Column(Integer, ForeignKey('usuarios.id'), nullable=False)
+    id_planeta = Column(Integer, ForeignKey('planetas.id'))
+    id_personaje = Column(Integer, ForeignKey('personajes.id'))
+    usuario = relationship('Usuario', back_populates='favoritos')
+    planeta = relationship('Planeta', back_populates='favoritos')
+    personaje = relationship('Personaje', back_populates='favoritos')
+
+if __name__ == '__main__':
+    Base.metadata.create_all(engine)
