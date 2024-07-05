@@ -1,6 +1,9 @@
+
+
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
+from eralchemy2 import render_er
 
 Base = declarative_base()
 engine = create_engine('sqlite:///blog_starwars.db')
@@ -44,3 +47,6 @@ class Favoritos(Base):
 
 if __name__ == '__main__':
     Base.metadata.create_all(engine)
+
+## Draw from SQLAlchemy base
+render_er(Base, 'diagram.png')
